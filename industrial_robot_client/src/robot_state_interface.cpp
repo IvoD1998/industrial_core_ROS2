@@ -33,7 +33,7 @@
 #include "industrial_utils/param_utils.h"
 
 using industrial::smpl_msg_connection::SmplMsgConnection;
-using industrial_utils::param::getJointNames;
+using industrial_utils::param::ParamUtils;
 namespace StandardSocketPorts = industrial::simple_socket::StandardSocketPorts;
 
 namespace industrial_robot_client
@@ -41,8 +41,8 @@ namespace industrial_robot_client
 namespace robot_state_interface
 {
 
-RobotStateInterface::RobotStateInterface()
-{
+RobotStateInterface::RobotStateInterface() : Node("robot_state_interface")
+{ 
   this->connection_ = NULL;
   this->add_handler(&default_joint_handler_);
   this->add_handler(&default_robot_status_handler_);
@@ -54,42 +54,47 @@ bool RobotStateInterface::init(std::string default_ip, int default_port)
   int port;
 
   // override IP/port with ROS params, if available
-  ros::param::param<std::string>("robot_ip_address", ip, default_ip);
-  ros::param::param<int>("~port", port, default_port);
+  this->declare_parameter<std::string>("robot_ip_address", default_ip);
+  this->declare_parameter<int>("~port", default_port);
+  this->get_parameter("robot_ip_address", ip);
+  this->get_parameter("~port", port);
 
   // check for valid parameter values
   if (ip.empty())
   {
-    ROS_ERROR("No valid robot IP address found.  Please set ROS 'robot_ip_address' param");
+    RCLCPP_ERROR(this->get_logger(), "No valid robot IP address found.  Please set ROS 'robot_ip_address' param");
     return false;
   }
   if (port <= 0)
   {
-    ROS_ERROR("No valid robot IP port found.  Please set ROS '~port' param");
+    RCLCPP_ERROR(this->get_logger(), "No valid robot IP port found.  Please set ROS '~port' param");
     return false;
   }
 
   char* ip_addr = strdup(ip.c_str());  // connection.init() requires "char*", not "const char*"
-  ROS_INFO("Robot state connecting to IP address: '%s:%d'", ip_addr, port);
+  RCLCPP_INFO(this->get_logger(), "Robot state connecting to IP address: '%s:%d'", ip_addr, port);
   default_tcp_connection_.init(ip_addr, port);
   free(ip_addr);
 
   return init(&default_tcp_connection_);
 }
 
-bool RobotStateInterface::init(SmplMsgConnection* connection)
+bool RobotStateInterface::init(industrial::smpl_msg_connection::SmplMsgConnection *connection)
 {
   std::vector<std::string> joint_names;
-  if (!getJointNames("controller_joint_names", "robot_description", joint_names))
+  ParamUtils pu;
+  // if (!pu.getJointNames("move_group", "rviz2", "controller_joint_names", "robot_description", joint_names))
+  if (!pu.getJointNames("move_group", "moveit_simple_controller_manager.manipulator_controller.joints", joint_names))
   {
-    ROS_ERROR("Failed to initialize joint_names.  Aborting");
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize joint_names.  Aborting");
     return false;
   }
 
   return init(connection, joint_names);
 }
 
-bool RobotStateInterface::init(SmplMsgConnection* connection, std::vector<std::string>& joint_names)
+bool RobotStateInterface::init(industrial::smpl_msg_connection::SmplMsgConnection *connection, 
+                               std::vector<std::string>& joint_names)
 {
   this->joint_names_ = joint_names;
   this->connection_ = connection;

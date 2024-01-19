@@ -31,12 +31,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/byte_array.h"
 #include "simple_message/simple_serialize.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "byte_array.h"
 #include "simple_serialize.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial
 {
@@ -51,7 +50,7 @@ ByteArray::ByteArray(void)
 {
   this->init();
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Byte swapping enabled");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Byte swapping enabled");
 #endif
 }
 
@@ -70,14 +69,13 @@ bool ByteArray::init(const char* buffer, const shared_int byte_size)
 
   if (this->getMaxBufferSize() >= byte_size)
   {
-    LOG_COMM("Initializing buffer to size: %d", byte_size);
+    ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Initializing buffer to size: %d", byte_size);
     this->load((void*)buffer, byte_size);
     rtn = true;
   }
   else
   {
-    LOG_ERROR("Failed to initialize byte array, buffer size: %u greater than max: %u",
-              byte_size, this->getMaxBufferSize());
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Failed to initialize byte array, buffer size: %u greater than max: %u", byte_size, this->getMaxBufferSize());
     rtn = false;
   }
   return rtn;
@@ -91,7 +89,7 @@ void ByteArray::copyFrom(ByteArray & buffer)
   }
   else
   {
-    LOG_WARN("Byte array copy not performed, buffer to copy is empty");
+    ////RCLCPP_WARN(rclcpp::get_logger("byte_array"), "Byte array copy not performed, buffer to copy is empty");
   }
 }
 
@@ -104,9 +102,9 @@ void ByteArray::copyTo(std::vector<char> &out)
 #ifdef BYTE_SWAPPING
 void ByteArray::swap(void *value, shared_int byteSize)
 {
-  LOG_COMM("Executing byte swapping");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte swapping");
 
-  LOG_COMM("Value (swapping-input): %u", (unsigned int)(*(unsigned int*)value));
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (swapping-input): %u", (unsigned int)(*(unsigned int*)value));
   for (unsigned int i = 0; i < byteSize / 2; i++)
   {
     unsigned int endIndex = byteSize - i - 1;
@@ -117,12 +115,12 @@ void ByteArray::swap(void *value, shared_int byteSize)
     char beginByte = ((char*)value)[beginIndex];
     unsigned int beginInt = beginByte;
 
-    LOG_COMM("Swap beginIndex i: %u, endIndex: %u, begin[]: %u, end[]: %u",
+    ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Swap beginIndex i: %u, endIndex: %u, begin[]: %u, end[]: %u",
              beginIndex, endIndex, beginInt, endInt);
     ((char*)value)[endIndex] = beginByte;
     ((char*)value)[beginIndex] = endByte;
   }
-  LOG_COMM("Value (swapping-output): %u", (unsigned int)(*(unsigned int*)value));
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (swapping-output): %u", (unsigned int)(*(unsigned int*)value));
 
 }
 #endif
@@ -147,9 +145,9 @@ bool ByteArray::load(shared_bool value)
 bool ByteArray::load(shared_real value)
 {
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (loading-input): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (loading-input): %f", value);
   this->swap(&value, sizeof(shared_real));
-  LOG_COMM("Value (loading-output): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (loading-output): %f", value);
 #endif
 
   return this->load(&value, sizeof(shared_real));
@@ -158,9 +156,9 @@ bool ByteArray::load(shared_real value)
 bool ByteArray::load(shared_int value)
 {
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (loading-input): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (loading-input): %d", value);
   this->swap(&value, sizeof(shared_int));
-  LOG_COMM("Value (loading-output): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (loading-output): %d", value);
 #endif
 
   return this->load(&value, sizeof(shared_int));
@@ -168,19 +166,19 @@ bool ByteArray::load(shared_int value)
 
 bool ByteArray::load(simple_serialize::SimpleSerialize &value)
 {
-  LOG_COMM("Executing byte array load through simple serialize");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array load through simple serialize");
   return value.load(this);
 }
 
 bool ByteArray::load(ByteArray &value)
 {
-  LOG_COMM("Executing byte array load through byte array");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array load through byte array");
   std::deque<char>& src = value.buffer_;
   std::deque<char>& dest  = this->buffer_;
 
   if (this->getBufferSize()+value.getBufferSize() > this->getMaxBufferSize())
   {
-    LOG_ERROR("Additional data would exceed buffer size");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Additional data would exceed buffer size");
     return false;
   }
 
@@ -193,16 +191,16 @@ bool ByteArray::load(void* value, const shared_int byte_size)
 
   bool rtn;
 
-  LOG_COMM("Executing byte array load through void*, size: %d", byte_size);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array load through void*, size: %d", byte_size);
   // Check inputs
   if (NULL == value)
   {
-    LOG_ERROR("NULL point passed into load method");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "NULL point passed into load method");
     return false;
   }
   if (this->getBufferSize()+byte_size > this->getMaxBufferSize())
   {
-    LOG_ERROR("Additional data would exceed buffer size");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Additional data would exceed buffer size");
     return false;
   }
 
@@ -215,7 +213,7 @@ bool ByteArray::load(void* value, const shared_int byte_size)
   }
   catch (std::exception)
   {
-    LOG_ERROR("Failed to load byte array");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Failed to load byte array");
     rtn = false;
   }
 
@@ -242,9 +240,9 @@ bool ByteArray::unload(shared_real &value)
   bool rtn = this->unload(&value, sizeof(shared_real));
 
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (unloading-input): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-input): %f", value);
   this->swap(&value, sizeof(shared_real));
-  LOG_COMM("Value (unloading-output): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-output): %f", value);
 #endif
 
   return rtn;
@@ -255,23 +253,23 @@ bool ByteArray::unload(shared_int &value)
   bool rtn = this->unload(&value, sizeof(shared_int));
 
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (unloading-input): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-input): %d", value);
   this->swap(&value, sizeof(shared_int));
-  LOG_COMM("Value (unloading-output): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-output): %d", value);
 #endif
   return rtn;
 }
 
 bool ByteArray::unload(simple_serialize::SimpleSerialize &value)
 {
-  LOG_COMM("Executing byte array unload through simple serialize");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array unload through simple serialize");
   return value.unload(this);
 }
 
 
 bool ByteArray::unload(ByteArray &value, const shared_int byte_size)
 {
-  LOG_COMM("Executing byte array unload through byte array");
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array unload through byte array");
   bool rtn;
 
   if (byte_size <= this->getBufferSize())
@@ -285,7 +283,7 @@ bool ByteArray::unload(ByteArray &value, const shared_int byte_size)
   }
   else
   {
-    LOG_ERROR("Buffer smaller than requested size.");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Buffer smaller than requested size.");
     rtn = false;
   }
 
@@ -296,11 +294,11 @@ bool ByteArray::unload(void* value, shared_int byteSize)
 {
   bool rtn;
 
-  LOG_COMM("Executing byte array unload through void*, size: %d", byteSize);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array unload through void*, size: %d", byteSize);
   // Check inputs
   if (NULL == value)
   {
-    LOG_ERROR("NULL point passed into unload method");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "NULL point passed into unload method");
     return false;
   }
 
@@ -314,7 +312,7 @@ bool ByteArray::unload(void* value, shared_int byteSize)
   }
   else
   {
-    LOG_ERROR("Buffer is smaller than requested byteSize.");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Buffer is smaller than requested byteSize.");
     rtn = false;
   }
 
@@ -336,9 +334,9 @@ bool ByteArray::unloadFront(industrial::shared_types::shared_real &value)
   bool rtn = this->unloadFront(&value, sizeof(shared_real));
 
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (unloading-input): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-input): %f", value);
   this->swap(&value, sizeof(shared_real));
-  LOG_COMM("Value (unloading-output): %f", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-output): %f", value);
 #endif
   return rtn;
 }
@@ -348,9 +346,9 @@ bool ByteArray::unloadFront(industrial::shared_types::shared_int &value)
   bool rtn = this->unloadFront(&value, sizeof(shared_int));
 
 #ifdef BYTE_SWAPPING
-  LOG_COMM("Value (unloading-input): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-input): %d", value);
   this->swap(&value, sizeof(shared_int));
-  LOG_COMM("Value (unloading-output): %d", value);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Value (unloading-output): %d", value);
 #endif
   return rtn;
 }
@@ -359,11 +357,11 @@ bool ByteArray::unloadFront(void* value, const industrial::shared_types::shared_
 {
   bool rtn;
 
-  LOG_COMM("Executing byte array unloadFront through void*, size: %d", byteSize);
+  ////RCLCPP_INFO(rclcpp::get_logger("byte_array"), "Executing byte array unloadFront through void*, size: %d", byteSize);
   // Check inputs
   if (NULL == value)
   {
-    LOG_ERROR("NULL point passed into unloadFront method");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "NULL point passed into unloadFront method");
     return false;
   }
 
@@ -377,7 +375,7 @@ bool ByteArray::unloadFront(void* value, const industrial::shared_types::shared_
   }
   else
   {
-    LOG_ERROR("Buffer is smaller than requested byteSize.");
+    ////RCLCPP_ERROR(rclcpp::get_logger("byte_array"), "Buffer is smaller than requested byteSize.");
     rtn = false;
   }
 
@@ -405,3 +403,4 @@ bool ByteArray::isByteSwapEnabled()
 
 } // namespace byte_array
 } // namespace industrial
+

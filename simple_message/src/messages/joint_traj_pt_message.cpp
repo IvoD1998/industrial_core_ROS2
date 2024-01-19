@@ -33,13 +33,12 @@
 #include "simple_message/messages/joint_traj_pt_message.h"
 #include "simple_message/joint_data.h"
 #include "simple_message/byte_array.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_traj_pt_message.h"
 #include "joint_data.h"
 #include "byte_array.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::shared_types;
 using namespace industrial::byte_array;
@@ -73,7 +72,7 @@ bool JointTrajPtMessage::init(industrial::simple_message::SimpleMessage & msg)
   }
   else
   {
-    LOG_ERROR("Failed to unload joint traj pt data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_message"), "Failed to unload joint traj pt data");
   }
   return rtn;
 }
@@ -94,7 +93,7 @@ void JointTrajPtMessage::init()
 bool JointTrajPtMessage::load(ByteArray *buffer)
 {
 	bool rtn = false;
-	LOG_COMM("Executing joint traj. pt. message load");
+	//RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_message"), "Executing joint traj. pt. message load");
 	if (buffer->load(this->point_))
 	{
 		rtn = true;
@@ -102,7 +101,7 @@ bool JointTrajPtMessage::load(ByteArray *buffer)
 	else
 	{
 		rtn = false;
-		LOG_ERROR("Failed to load joint traj. pt data");
+		//RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_message"), "Failed to load joint traj. pt data");
 	}
 	return rtn;
 }
@@ -110,7 +109,7 @@ bool JointTrajPtMessage::load(ByteArray *buffer)
 bool JointTrajPtMessage::unload(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing joint traj pt message unload");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_message"), "Executing joint traj pt message unload");
 
   if (buffer->unload(this->point_))
   {
@@ -119,7 +118,7 @@ bool JointTrajPtMessage::unload(ByteArray *buffer)
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to unload joint traj pt data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_message"), "Failed to unload joint traj pt data");
   }
   return rtn;
 }

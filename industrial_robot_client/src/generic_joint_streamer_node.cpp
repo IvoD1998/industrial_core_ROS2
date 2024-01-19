@@ -36,12 +36,14 @@ using industrial_robot_client::joint_trajectory_streamer::JointTrajectoryStreame
 int main(int argc, char** argv)
 {
   // initialize node
-  ros::init(argc, argv, "motion_interface");
+  rclcpp::init(argc, argv);
 
   // launch the default JointTrajectoryStreamer connection/handlers
-  JointTrajectoryStreamer motionInterface;
-  motionInterface.init();
-  motionInterface.run();
+  std::shared_ptr<JointTrajectoryStreamer> jts = std::make_shared<JointTrajectoryStreamer>();
+  jts->init();
+
+  rclcpp::spin(jts);
+  rclcpp::shutdown();
 
   return 0;
 }

@@ -39,6 +39,10 @@ namespace joint_trajectory_downloader
 using industrial::simple_message::SimpleMessage;
 namespace SpecialSeqValues = industrial::joint_traj_pt::SpecialSeqValues;
 
+JointTrajectoryDownloader::JointTrajectoryDownloader() : JointTrajectoryInterface()
+{ 
+}
+
 bool JointTrajectoryDownloader::send_to_robot(const std::vector<JointTrajPtMessage>& messages)
 {
   bool rslt=true;
@@ -55,23 +59,22 @@ bool JointTrajectoryDownloader::send_to_robot(const std::vector<JointTrajPtMessa
 
   if (!this->connection_->isConnected())
   {
-    ROS_WARN("Attempting robot reconnection");
+    RCLCPP_WARN(this->get_logger(), "Attempting robot reconnection");
     this->connection_->makeConnect();
   }
 
-  ROS_INFO("Sending trajectory points, size: %d", (int)points.size());
+  RCLCPP_INFO(this->get_logger(), "Sending trajectory points, size: %d", (int)points.size());
 
   for (int i = 0; i < (int)points.size(); ++i)
   {
-    ROS_DEBUG("Sending joints trajectory point[%d]", i);
+    RCLCPP_DEBUG(this->get_logger(), "Sending joints trajectory point[%d]", i);
 
     points[i].toTopic(msg);
     bool ptRslt = this->connection_->sendMsg(msg);
     if (ptRslt)
-      ROS_DEBUG("Point[%d] sent to controller", i);
+      RCLCPP_DEBUG(this->get_logger(), "Point[%d] sent to controller", i);
     else
-      ROS_WARN("Failed sent joint point, skipping point");
-
+      RCLCPP_WARN(this->get_logger(), "Failed sent joint point, skipping point");
     rslt &= ptRslt;
   }
 

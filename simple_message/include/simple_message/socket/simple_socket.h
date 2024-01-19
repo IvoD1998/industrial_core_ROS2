@@ -33,14 +33,14 @@
 #define SIMPLE_SOCKET_H
 
 #ifndef FLATHEADERS
-#include "simple_message/log_wrapper.h"
 #include "simple_message/shared_types.h"
 #include "simple_message/smpl_msg_connection.h"
 #else
-#include "log_wrapper.h"
 #include "shared_types.h"
 #include "smpl_msg_connection.h"
 #endif
+#include <netinet/in.h>
+#include "rclcpp/rclcpp.hpp"
 
 // remove LINUXSOCKETS after Melodic (bw compat for #262)
 #if defined(SIMPLE_MESSAGE_LINUX) || defined(LINUXSOCKETS)
@@ -264,7 +264,7 @@ protected:
    */
   void logSocketError(const char* msg, const int rc, const int error_no)
   {
-    LOG_ERROR("%s, rc: %d. Error: '%s' (errno: %d)", msg, rc, strerror(error_no), error_no);
+    RCLCPP_ERROR(rclcpp::get_logger("simple_socket"), "%s, rc: %d. Error: '%s' (errno: %d)", msg, rc, strerror(error_no), error_no);
   }
 
   // Send/Receive functions (inherited classes should override raw methods

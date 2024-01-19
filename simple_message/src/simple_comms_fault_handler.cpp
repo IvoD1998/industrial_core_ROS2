@@ -31,11 +31,10 @@
 
 #ifndef FLATHEADERS
 #include "simple_message/simple_comms_fault_handler.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "simple_comms_fault_handler.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial
 {
@@ -59,13 +58,12 @@ bool SimpleCommsFaultHandler::init(industrial::smpl_msg_connection::SmplMsgConne
   if (NULL != connection)
   {
     this->setConnection(connection);
-    LOG_INFO("Default communications fault handler successfully initialized");
+    //RCLCPP_INFO(rclcpp::get_logger("simple_comms_fault_handler"), "Default communications fault handler successfully initialized");
     rtn = true;
   }
   else
   {
-    LOG_ERROR("Failed to initialize default communications fault handler");
-    rtn = false;
+    //RCLCPP_ERROR(rclcpp::get_logger("simple_comms_fault_handler"), "Failed to initialize default communications fault handler");
   }
   return rtn;
 }
@@ -75,12 +73,12 @@ void SimpleCommsFaultHandler::connectionFailCB()
 
   if (!(this->getConnection()->isConnected()))
   {
-    LOG_INFO("Connection failed, attempting reconnect");
+    //RCLCPP_INFO(rclcpp::get_logger("simple_comms_fault_handler"), "Connection failed, attempting reconnect");
     this->getConnection()->makeConnect();
   }
   else
   {
-    LOG_WARN("Connection fail callback called while still connected (Possible bug)");
+    //RCLCPP_WARN(rclcpp::get_logger("simple_comms_fault_handler"), "Connection fail callback called while still connected (Possible bug)");
   }
 }
 
@@ -88,7 +86,6 @@ void SimpleCommsFaultHandler::connectionFailCB()
 
 }//namespace default_comms_fault_handler
 }//namespace industrial
-
 
 
 

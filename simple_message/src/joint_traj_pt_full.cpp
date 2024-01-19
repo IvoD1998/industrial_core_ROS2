@@ -31,12 +31,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/joint_traj_pt_full.h"
 #include "simple_message/shared_types.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_traj_pt_full.h"
 #include "shared_types.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::joint_data;
 using namespace industrial::shared_types;
@@ -107,101 +106,101 @@ bool JointTrajPtFull::operator==(JointTrajPtFull &rhs)
 
 bool JointTrajPtFull::load(industrial::byte_array::ByteArray *buffer)
 {
-  LOG_COMM("Executing joint trajectory point load");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_full"), "Executing joint trajectory point load");
 
   if (!buffer->load(this->robot_id_))
   {
-    LOG_ERROR("Failed to load joint traj pt. robot_id");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj pt. robot_id");
     return false;
   }
 
   if (!buffer->load(this->sequence_))
   {
-    LOG_ERROR("Failed to load joint traj. pt. sequence number");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. sequence number");
     return false;
   }
 
   if (!buffer->load(this->valid_fields_))
   {
-    LOG_ERROR("Failed to load joint traj. pt. valid fields");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. valid fields");
     return false;
   }
 
   if (!buffer->load(this->time_))
   {
-    LOG_ERROR("Failed to load joint traj. pt. time");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. time");
     return false;
   }
 
   if (!this->positions_.load(buffer))
   {
-    LOG_ERROR("Failed to load joint traj. pt. positions");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. positions");
     return false;
   }
 
   if (!this->velocities_.load(buffer))
   {
-    LOG_ERROR("Failed to load joint traj. pt. velocities");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. velocities");
     return false;
   }
 
   if (!this->accelerations_.load(buffer))
   {
-    LOG_ERROR("Failed to load joint traj. pt. accelerations");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to load joint traj. pt. accelerations");
     return false;
   }
 
-  LOG_COMM("Trajectory point successfully loaded");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_full"), "Trajectory point successfully loaded");
   return true;
 }
 
 bool JointTrajPtFull::unload(industrial::byte_array::ByteArray *buffer)
 {
-  LOG_COMM("Executing joint traj. pt. unload");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_full"), "Executing joint traj. pt. unload");
 
   if (!this->accelerations_.unload(buffer))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. accelerations");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. accelerations");
     return false;
   }
 
   if (!this->velocities_.unload(buffer))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. velocities");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. velocities");
     return false;
   }
 
   if (!this->positions_.unload(buffer))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. positions");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. positions");
     return false;
   }
 
   if (!buffer->unload(this->time_))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. time");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. time");
     return false;
   }
 
   if (!buffer->unload(this->valid_fields_))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. valid fields");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. valid fields");
     return false;
   }
 
   if (!buffer->unload(this->sequence_))
   {
-    LOG_ERROR("Failed to unload joint traj. pt. sequence number");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Failed to unload joint traj. pt. sequence number");
     return false;
   }
 
   if (!buffer->unload(this->robot_id_))
   {
-    LOG_ERROR("Faild to unload joint traj. pt. robot_id");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_traj_pt_full"), "Faild to unload joint traj. pt. robot_id");
     return false;
   }
 
-  LOG_COMM("Joint traj. pt successfully unloaded");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_traj_pt_full"), "Joint traj. pt successfully unloaded");
   return true;
 }
 

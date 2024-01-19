@@ -85,7 +85,7 @@ public:
    *
    * \param min_buffer_size minimum number of points as required by robot implementation
    */
-  JointTrajectoryStreamer(int min_buffer_size = 1) : min_buffer_size_(min_buffer_size) {};
+  JointTrajectoryStreamer(int min_buffer_size = 1);
 
   /**
    * \brief Class initializer
@@ -104,9 +104,9 @@ public:
 
   ~JointTrajectoryStreamer();
 
-  virtual void jointTrajectoryCB(const trajectory_msgs::JointTrajectoryConstPtr &msg);
+  virtual void jointTrajectoryCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr &msg);
 
-  virtual bool trajectory_to_msgs(const trajectory_msgs::JointTrajectoryConstPtr &traj, std::vector<JointTrajPtMessage>* msgs);
+  virtual bool trajectory_to_msgs(const trajectory_msgs::msg::JointTrajectory::SharedPtr &traj, std::vector<JointTrajPtMessage>* msgs);
 
   void streamingThread();
 
@@ -121,7 +121,7 @@ protected:
   int current_point_;
   std::vector<JointTrajPtMessage> current_traj_;
   TransferState state_;
-  ros::Time streaming_start_;
+  rclcpp::Time streaming_start_;
   int min_buffer_size_;
 };
 

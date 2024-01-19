@@ -30,11 +30,10 @@
  */
 #ifndef FLATHEADERS
 #include "simple_message/message_handler.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "message_handler.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial
 {
@@ -70,13 +69,13 @@ bool MessageHandler::init(int msg_type, SmplMsgConnection* connection)
     }
     else
     {
-      LOG_ERROR("Message connection is NULL");
+      //RCLCPP_ERROR(rclcpp::get_logger("message_handler"), "Message connection is NULL");
       rtn = false;
     }
     }
   else
   {
-    LOG_ERROR("Message handler type: %d, not valid", msg_type);
+    //RCLCPP_ERROR(rclcpp::get_logger("message_handler"), "Message handler type: %d, not valid", msg_type);
     rtn = false;
     }
     
@@ -95,7 +94,7 @@ bool MessageHandler::callback(SimpleMessage & in)
   }
   else
   {
-    LOG_ERROR("Invalid message passed to callback");
+    //RCLCPP_ERROR(rclcpp::get_logger("message_handler"), "Invalid message passed to callback");
     rtn = true;
   }
   
@@ -115,14 +114,13 @@ bool MessageHandler::validateMsg(SimpleMessage & in)
     }
     else
     {
-      LOG_WARN("Message type: %d, doesn't match handler type: %d",
-                  in.getMessageType(), this->getMsgType());
+      //RCLCPP_WARN(rclcpp::get_logger("message_handler"), "Message type: %d, doesn't match handler type: %d", in.getMessageType(), this->getMsgType());
       rtn = false;
     }
   }
   else
   {
-    LOG_WARN("Passed in message invalid");
+    //RCLCPP_WARN(rclcpp::get_logger("message_handler"), "Passed in message invalid");
   }
 
   return rtn;

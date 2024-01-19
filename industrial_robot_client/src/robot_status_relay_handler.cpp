@@ -30,8 +30,6 @@
  */
 
 #include "industrial_robot_client/robot_status_relay_handler.h"
-#include "industrial_msgs/RobotStatus.h"
-#include "simple_message/log_wrapper.h"
 
 using namespace industrial::shared_types;
 using namespace industrial::smpl_msg_connection;
@@ -44,46 +42,49 @@ namespace industrial_robot_client
 namespace robot_status_relay_handler
 {
 
-bool RobotStatusRelayHandler::init(SmplMsgConnection* connection)
+RobotStatusRelayHandler::RobotStatusRelayHandler() : Node("robot_status_relay_handler")
 {
-  this->pub_robot_status_ = this->node_.advertise<industrial_msgs::RobotStatus>("robot_status", 1);
-  return init((int)StandardMsgTypes::STATUS, connection);
 }
 
-bool RobotStatusRelayHandler::internalCB(SimpleMessage& in)
+bool RobotStatusRelayHandler::init(industrial::smpl_msg_connection::SmplMsgConnection *connection)
 {
-  RobotStatusMessage status_msg;
+  pub_robot_status_ = this->create_publisher<industrial_msgs::msg::RobotStatus>("robot_status", 1);
+  return init((int)industrial::simple_message::StandardMsgTypes::STATUS, connection);
+}
+
+bool RobotStatusRelayHandler::internalCB(industrial::simple_message::SimpleMessage &in)
+{
+  industrial::robot_status_message::RobotStatusMessage status_msg;
 
   if (!status_msg.init(in))
   {
-    LOG_ERROR("Failed to initialize status message");
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize status message");
     return false;
   }
 
   return internalCB(status_msg);
 }
 
-bool RobotStatusRelayHandler::internalCB(RobotStatusMessage & in)
+bool RobotStatusRelayHandler::internalCB(industrial::robot_status_message::RobotStatusMessage & in)
 {
-  industrial_msgs::RobotStatus status;
+  industrial_msgs::msg::RobotStatus status;
   bool rtn = true;
 
-  status.header.stamp = ros::Time::now();
-  status.drives_powered.val = TriStates::toROSMsgEnum(in.status_.getDrivesPowered());
-  status.e_stopped.val = TriStates::toROSMsgEnum(in.status_.getEStopped());
+  status.drives_powered.val = industrial::robot_status::TriStates::toROSMsgEnum(in.status_.getDrivesPowered());
+  status.e_stopped.val = industrial::robot_status::TriStates::toROSMsgEnum(in.status_.getEStopped());
   status.error_code = in.status_.getErrorCode();
-  status.in_error.val = TriStates::toROSMsgEnum(in.status_.getInError());
-  status.in_motion.val = TriStates::toROSMsgEnum(in.status_.getInMotion());
-  status.mode.val = RobotModes::toROSMsgEnum(in.status_.getMode());
-  status.motion_possible.val = TriStates::toROSMsgEnum(in.status_.getMotionPossible());
+  status.in_error.val = industrial::robot_status::TriStates::toROSMsgEnum(in.status_.getInError());
+  status.in_motion.val = industrial::robot_status::TriStates::toROSMsgEnum(in.status_.getInMotion());
+  status.mode.val = industrial::robot_status::RobotModes::toROSMsgEnum(in.status_.getMode());
+  status.motion_possible.val = industrial::robot_status::TriStates::toROSMsgEnum(in.status_.getMotionPossible());
   
-  this->pub_robot_status_.publish(status);
+  pub_robot_status_->publish(status);
 
   // Reply back to the controller if the sender requested it.
-  if (CommTypes::SERVICE_REQUEST == in.getCommType())
+  if (industrial::simple_message::CommTypes::SERVICE_REQUEST == in.getCommType())
   {
-    SimpleMessage reply;
-    in.toReply(reply, rtn ? ReplyTypes::SUCCESS : ReplyTypes::FAILURE);
+    industrial::simple_message::SimpleMessage reply;
+    in.toReply(reply, rtn ? industrial::simple_message::ReplyTypes::SUCCESS : industrial::simple_message::ReplyTypes::FAILURE);
     this->getConnection()->sendMsg(reply);
   }
 

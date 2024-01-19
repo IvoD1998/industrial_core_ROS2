@@ -31,11 +31,10 @@
 
 #ifndef FLATHEADERS
 #include "simple_message/socket/udp_server.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "udp_server.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::byte_array;
 
@@ -70,8 +69,8 @@ bool UdpServer::init(int port_num)
   if (this->SOCKET_FAIL != rc)
   {
     this->setSockHandle(rc);
-    LOG_DEBUG("Socket created, rc: %d", rc);
-    LOG_DEBUG("Socket handle: %d", this->getSockHandle());
+    //RCLCPP_DEBUG(rclcpp::get_logger("udp_server"), "Socket created, rc: %d", rc);
+    //RCLCPP_DEBUG(rclcpp::get_logger("udp_server"), "Socket handle: %d", this->getSockHandle());
 
     // Initialize address data structure
     memset(&this->sockaddr_, 0, sizeof(this->sockaddr_));
@@ -88,18 +87,18 @@ bool UdpServer::init(int port_num)
     if (this->SOCKET_FAIL != rc)
     {
       rtn = true;
-      LOG_INFO("Server socket successfully initialized");
+      RCLCPP_INFO(rclcpp::get_logger("udp_server"), "Server socket successfully initialized");
     }
     else
     {
-      LOG_ERROR("Failed to bind socket, rc: %d", rc);
+      //RCLCPP_ERROR(rclcpp::get_logger("udp_server"), "Failed to bind socket, rc: %d", rc);
       CLOSE(this->getSockHandle());
       rtn = false;
     }
   }
   else
   {
-    LOG_ERROR("Failed to create socket, rc: %d", rc);
+    //RCLCPP_ERROR(rclcpp::get_logger("udp_server"), "Failed to create socket, rc: %d", rc);
     rtn = false;
   }
   return rtn;
@@ -133,7 +132,7 @@ bool UdpServer::makeConnect()
         
         if (bytesRcvd > 0)
         {
-          LOG_DEBUG("UDP server received %d bytes while waiting for handshake", bytesRcvd);
+          //RCLCPP_DEBUG(rclcpp::get_logger("udp_server"), "UDP server received %d bytes while waiting for handshake", bytesRcvd);
           recv.init(&this->buffer_[0], bytesRcvd);
           recv.unload((void*)&recvHS, sizeof(recvHS));
         }
@@ -156,7 +155,7 @@ bool UdpServer::makeConnect()
   }
   else
   {
-    LOG_WARN("Tried to connect when socket already in connected state");
+    //RCLCPP_WARN(rclcpp::get_logger("udp_server"), "Tried to connect when socket already in connected state");
     rtn = true;
   }
 

@@ -31,12 +31,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/joint_traj.h"
 #include "simple_message/shared_types.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_traj.h"
 #include "shared_types.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::shared_types;
 using namespace industrial::joint_traj_pt;
@@ -79,7 +78,7 @@ bool JointTraj::addPoint(JointTrajPt & point)
 	else
 	{
 		rtn = false;
-		LOG_ERROR("Failed to add point, buffer is full");
+		//RCLCPP_ERROR(rclcpp::get_logger("joint_traj"), "Failed to add point, buffer is full");
 	}
 
 	return rtn;
@@ -96,7 +95,7 @@ bool JointTraj::getPoint(shared_int index, JointTrajPt & point)
 	}
 	else
 	{
-		LOG_ERROR("Point index: %d, is greater than size: %d", index, this->size());
+		//RCLCPP_ERROR(rclcpp::get_logger("joint_traj"), "Point index: %d, is greater than size: %d", index, this->size());
 		rtn = false;
 	}
 	return rtn;
@@ -126,7 +125,7 @@ bool JointTraj::operator==(JointTraj &rhs)
 			rhs.getPoint(i, value);
 			if(!(this->points_[i] == value))
 			{
-				LOG_DEBUG("Joint trajectory point different");
+				//RCLCPP_DEBUG(rclcpp::get_logger("joint_traj"), "Joint trajectory point different");
 				rtn = false;
 				break;
 			}
@@ -138,7 +137,7 @@ bool JointTraj::operator==(JointTraj &rhs)
 	}
 	else
 	{
-		LOG_DEBUG("Joint trajectory compare failed, size mismatch");
+		//RCLCPP_DEBUG(rclcpp::get_logger("joint_traj"), "Joint trajectory compare failed, size mismatch");
 		rtn = false;
 	}
 
@@ -151,14 +150,14 @@ bool JointTraj::load(industrial::byte_array::ByteArray *buffer)
 	bool rtn = false;
 	JointTrajPt value;
 
-	LOG_COMM("Executing joint trajectory load");
+	//RCLCPP_INFO(rclcpp::get_logger("joint_traj"), "Executing joint trajectory load");
 	for (shared_int i = 0; i < this->size(); i++)
 	{
 		this->getPoint(i, value);
 		rtn = buffer->load(value);
 		if (!rtn)
 		{
-			LOG_ERROR("Failed to load joint traj.pt. data");
+			//RCLCPP_ERROR(rclcpp::get_logger("joint_traj"), "Failed to load joint traj.pt. data");
 			rtn = false;
 			break;
 		}
@@ -177,7 +176,7 @@ bool JointTraj::unload(industrial::byte_array::ByteArray *buffer)
 	bool rtn = false;
 	JointTrajPt value;
 
-	LOG_COMM("Executing joint trajectory unload");
+	//RCLCPP_INFO(rclcpp::get_logger("joint_traj"), "Executing joint trajectory unload");
 
 	rtn = buffer->unload(this->size_);
 
@@ -188,7 +187,7 @@ bool JointTraj::unload(industrial::byte_array::ByteArray *buffer)
 			rtn = buffer->unload(value);
 			if (!rtn)
 			{
-				LOG_ERROR("Failed to unload message point: %d from data[%d]", i, buffer->getBufferSize());
+				//RCLCPP_ERROR(rclcpp::get_logger("joint_traj"), "Failed to unload message point: %d from data[%d]", i, buffer->getBufferSize());
 				break;
 			}
 			this->points_[i].copyFrom(value);
@@ -196,7 +195,7 @@ bool JointTraj::unload(industrial::byte_array::ByteArray *buffer)
 	}
 	else
 	{
-		LOG_ERROR("Failed to unload trajectory size");
+		//RCLCPP_ERROR(rclcpp::get_logger("joint_traj"), "Failed to unload trajectory size");
 	}
 	return rtn;
 }

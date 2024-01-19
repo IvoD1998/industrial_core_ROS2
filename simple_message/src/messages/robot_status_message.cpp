@@ -33,13 +33,12 @@
 #include "simple_message/messages/robot_status_message.h"
 #include "simple_message/robot_status.h"
 #include "simple_message/byte_array.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "robot_status_message.h"
 #include "robot_status.h"
 #include "byte_array.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::shared_types;
 using namespace industrial::byte_array;
@@ -74,7 +73,7 @@ bool RobotStatusMessage::init(industrial::simple_message::SimpleMessage & msg)
   }
   else
   {
-    LOG_ERROR("Failed to unload robot status data");
+    //RCLCPP_ERROR(rclcpp::get_logger("robot_status_message"), "Failed to unload robot status data");
   }
   return rtn;
 }
@@ -94,7 +93,7 @@ void RobotStatusMessage::init()
 bool RobotStatusMessage::load(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing robot status message load");
+  //RCLCPP_INFO(rclcpp::get_logger("robot_status_message"), "Executing robot status message load");
   if (buffer->load(this->status_))
   {
     rtn = true;
@@ -102,7 +101,7 @@ bool RobotStatusMessage::load(ByteArray *buffer)
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to load robot status data");
+    //RCLCPP_ERROR(rclcpp::get_logger("robot_status_message"), "Failed to load robot status data");
   }
   return rtn;
 }
@@ -110,7 +109,7 @@ bool RobotStatusMessage::load(ByteArray *buffer)
 bool RobotStatusMessage::unload(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing robot status message unload");
+  //RCLCPP_INFO(rclcpp::get_logger("robot_status_message"), "Executing robot status message unload");
 
   if (buffer->unload(this->status_))
   {
@@ -119,7 +118,7 @@ bool RobotStatusMessage::unload(ByteArray *buffer)
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to unload robot status data");
+    //RCLCPP_ERROR(rclcpp::get_logger("robot_status_message"), "Failed to unload robot status data");
   }
   return rtn;
 }

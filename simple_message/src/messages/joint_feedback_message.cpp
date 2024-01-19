@@ -32,13 +32,14 @@
 #include "simple_message/messages/joint_feedback_message.h"
 #include "simple_message/joint_data.h"
 #include "simple_message/byte_array.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_feedback_message.h"
 #include "joint_data.h"
 #include "byte_array.h"
-#include "log_wrapper.h"
 #endif
+
+#include "rclcpp/rclcpp.hpp"
+
 
 using namespace industrial::shared_types;
 using namespace industrial::byte_array;
@@ -72,7 +73,7 @@ bool JointFeedbackMessage::init(industrial::simple_message::SimpleMessage & msg)
   }
   else
   {
-    LOG_ERROR("Failed to unload joint feedback message data");
+    // LOG_ERROR("Failed to unload joint feedback message data");
   }
   return rtn;
 }
@@ -92,7 +93,7 @@ void JointFeedbackMessage::init()
 bool JointFeedbackMessage::load(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing joint feedback message load");
+  // LOG_COMM("Executing joint feedback message load");
   if (buffer->load(this->data_))
   {
     rtn = true;
@@ -100,7 +101,7 @@ bool JointFeedbackMessage::load(ByteArray *buffer)
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to load joint feedback message data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_feedback_message"), "Failed to load joint feedback message data");
   }
   return rtn;
 }
@@ -108,7 +109,7 @@ bool JointFeedbackMessage::load(ByteArray *buffer)
 bool JointFeedbackMessage::unload(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing joint feedback message unload");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_feedback_message"), "Executing joint feedback message unload");
 
   if (buffer->unload(this->data_))
   {
@@ -117,7 +118,7 @@ bool JointFeedbackMessage::unload(ByteArray *buffer)
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to unload joint feedback message data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_feedback_message"), "Failed to unload joint feedback message data");
   }
   return rtn;
 }

@@ -1,37 +1,78 @@
-cmake_minimum_required(VERSION 3.0.2)
-
+cmake_minimum_required(VERSION 3.5)
 project(industrial_utils)
 
-find_package(catkin REQUIRED COMPONENTS roscpp urdf)
-
-find_package(Boost REQUIRED COMPONENTS system)
-
-catkin_package(
-    CATKIN_DEPENDS roscpp urdf
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-)
-
-include_directories(include
-  ${catkin_INCLUDE_DIRS})
-
-add_library(${PROJECT_NAME} src/param_utils.cpp src/utils.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
-
-
-if(CATKIN_ENABLE_TESTING)
-    catkin_add_gtest(utest_inds_utils test/utest.cpp)
-    target_link_libraries(utest_inds_utils ${PROJECT_NAME} ${catkin_LIBRARIES})
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
 endif()
 
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-install(
-    TARGETS ${PROJECT_NAME} 
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(urdf_extention REQUIRED)
+
+include_directories(
+  include
+  include/industrial_utils
+)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  rclcpp
+  urdf_extention
+)
+
+add_library(${PROJECT_NAME} 
+  SHARED
+  src/param_utils.cpp
+  src/utils.cpp
+)
+target_link_libraries(${PROJECT_NAME}
+  ${rclcpp_LIBRARIES}
+  ${urdf_extention_LIBRARIES}
+)
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${rclcpp_INCLUDE_DIRS}
+  ${urdf_extention_INCLUDE_DIRS}  
+)
+  
+ament_target_dependencies(${PROJECT_NAME}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+ament_export_dependencies(
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+
+# INSTALL 
 install(
-    DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}/
+)
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

@@ -36,14 +36,14 @@
 #include <vector>
 #include <string>
 
-#include "ros/ros.h"
-#include "industrial_msgs/CmdJointTrajectory.h"
-#include "industrial_msgs/StopMotion.h"
-#include "sensor_msgs/JointState.h"
+#include "rclcpp/rclcpp.hpp"
+#include "industrial_msgs/srv/cmd_joint_trajectory.hpp"
+#include "industrial_msgs/srv/stop_motion.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 #include "simple_message/smpl_msg_connection.h"
 #include "simple_message/socket/tcp_client.h"
 #include "simple_message/messages/joint_traj_pt_message.h"
-#include "trajectory_msgs/JointTrajectory.h"
+#include "trajectory_msgs/msg/joint_trajectory.hpp"
 
 namespace industrial_robot_client
 {
@@ -61,7 +61,7 @@ namespace joint_trajectory_interface
  * THIS CLASS IS NOT THREAD-SAFE
  *
  */
-class JointTrajectoryInterface
+class JointTrajectoryInterface : public rclcpp::Node
 {
 
 public:
@@ -69,7 +69,7 @@ public:
  /**
   * \brief Default constructor.
   */
-    JointTrajectoryInterface() : default_joint_pos_(0.0), default_vel_ratio_(0.1), default_duration_(10.0) {};
+    JointTrajectoryInterface();
 
     /**
      * \brief Initialize robot connection using default method.
@@ -110,11 +110,6 @@ public:
 
   virtual ~JointTrajectoryInterface();
 
-  /**
-   * \brief Begin processing messages and publishing topics.
-   */
-  virtual void run() { ros::spin(); }
-
 protected:
 
   /**
@@ -131,7 +126,7 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool trajectory_to_msgs(const trajectory_msgs::JointTrajectoryConstPtr &traj, std::vector<JointTrajPtMessage>* msgs);
+  virtual bool trajectory_to_msgs(const trajectory_msgs::msg::JointTrajectory::SharedPtr &traj, std::vector<JointTrajPtMessage>* msgs);
 
   /**
    * \brief Transform joint positions before publishing.
@@ -142,7 +137,7 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool transform(const trajectory_msgs::JointTrajectoryPoint& pt_in, trajectory_msgs::JointTrajectoryPoint* pt_out)
+  virtual bool transform(const trajectory_msgs::msg::JointTrajectoryPoint& pt_in, trajectory_msgs::msg::JointTrajectoryPoint* pt_out)
   {
     *pt_out = pt_in;  // by default, no transform is applied
     return true;
@@ -158,8 +153,8 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool select(const std::vector<std::string>& ros_joint_names, const trajectory_msgs::JointTrajectoryPoint& ros_pt,
-                      const std::vector<std::string>& rbt_joint_names, trajectory_msgs::JointTrajectoryPoint* rbt_pt);
+  virtual bool select(const std::vector<std::string>& ros_joint_names, const trajectory_msgs::msg::JointTrajectoryPoint& ros_pt,
+                      const std::vector<std::string>& rbt_joint_names, trajectory_msgs::msg::JointTrajectoryPoint* rbt_pt);
 
   /**
    * \brief Reduce the ROS velocity commands (per-joint velocities) to a single scalar for communication to the robot.
@@ -172,7 +167,7 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool calc_speed(const trajectory_msgs::JointTrajectoryPoint& pt, double* rbt_velocity, double* rbt_duration);
+  virtual bool calc_speed(const trajectory_msgs::msg::JointTrajectoryPoint& pt, double* rbt_velocity, double* rbt_duration);
 
   /**
    * \brief Reduce the ROS velocity commands (per-joint velocities) to a single scalar for communication to the robot.
@@ -183,7 +178,7 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool calc_velocity(const trajectory_msgs::JointTrajectoryPoint& pt, double* rbt_velocity);
+  virtual bool calc_velocity(const trajectory_msgs::msg::JointTrajectoryPoint& pt, double* rbt_velocity);
 
   /**
    * \brief Compute the expected move duration for communication to the robot.
@@ -194,7 +189,7 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool calc_duration(const trajectory_msgs::JointTrajectoryPoint& pt, double* rbt_duration);
+  virtual bool calc_duration(const trajectory_msgs::msg::JointTrajectoryPoint& pt, double* rbt_duration);
 
   /**
    * \brief Send trajectory to robot, using this node's robot-connection.
@@ -212,7 +207,7 @@ protected:
    *
    * \param msg JointTrajectory message from ROS trajectory-planner
    */
-  virtual void jointTrajectoryCB(const trajectory_msgs::JointTrajectoryConstPtr &msg);
+  virtual void jointTrajectoryCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr &msg);
 
   /**
    * \brief Callback function registered to ROS stopMotion service
@@ -222,8 +217,8 @@ protected:
    * \param res StopMotion response to service call
    * \return true always.  Look at res.code.val to see if call actually succeeded.
    */
-  virtual bool stopMotionCB(industrial_msgs::StopMotion::Request &req,
-                                    industrial_msgs::StopMotion::Response &res);
+  virtual bool stopMotionCB(const std::shared_ptr<industrial_msgs::srv::StopMotion::Request> req,
+                            std::shared_ptr<industrial_msgs::srv::StopMotion::Response> res);
 
   /**
    * \brief Validate that trajectory command meets minimum requirements
@@ -231,29 +226,28 @@ protected:
    * \param traj incoming trajectory
    * \return true if trajectory is valid, false otherwise
    */
-  virtual bool is_valid(const trajectory_msgs::JointTrajectory &traj);
+  virtual bool is_valid(const trajectory_msgs::msg::JointTrajectory &traj);
 
   /*
    * \brief Callback for JointState topic
    *
    * \param msg JointState message
    */
-  virtual void jointStateCB(const sensor_msgs::JointStateConstPtr &msg);
+  virtual void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr &msg);
 
   TcpClient default_tcp_connection_;
 
-  ros::NodeHandle node_;
   SmplMsgConnection* connection_;
-  ros::Subscriber sub_cur_pos_;  // handle for joint-state topic subscription
-  ros::Subscriber sub_joint_trajectory_; // handle for joint-trajectory topic subscription
-  ros::ServiceServer srv_joint_trajectory_;  // handle for joint-trajectory service
-  ros::ServiceServer srv_stop_motion_;   // handle for stop_motion service
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr sub_cur_pos_;  // handle for joint-state topic subscription
+  rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr sub_joint_trajectory_; // handle for joint-trajectory topic subscription
+  rclcpp::Service<industrial_msgs::srv::CmdJointTrajectory>::SharedPtr srv_joint_trajectory_;  // handle for joint-trajectory service
+  rclcpp::Service<industrial_msgs::srv::StopMotion>::SharedPtr srv_stop_motion_;   // handle for stop_motion service
   std::vector<std::string> all_joint_names_;
   double default_joint_pos_;  // default position to use for "dummy joints", if none specified
   double default_vel_ratio_;  // default velocity ratio to use for joint commands, if no velocity or max_vel specified
   double default_duration_;   // default duration to use for joint commands, if no
   std::map<std::string, double> joint_vel_limits_;  // cache of max joint velocities from URDF
-  sensor_msgs::JointState cur_joint_pos_;  // cache of last received joint state
+  sensor_msgs::msg::JointState cur_joint_pos_;  // cache of last received joint state
 
 
 private:
@@ -267,8 +261,8 @@ private:
    * \param res CmdJointTrajectory response to service call
    * \return true always.  Look at res.code.val to see if call actually succeeded
    */
-  bool jointTrajectoryCB(industrial_msgs::CmdJointTrajectory::Request &req,
-                         industrial_msgs::CmdJointTrajectory::Response &res);
+  bool jointTrajectoryCB(const std::shared_ptr<industrial_msgs::srv::CmdJointTrajectory::Request> req,
+                         std::shared_ptr<industrial_msgs::srv::CmdJointTrajectory::Response> res);
 };
 
 } //joint_trajectory_interface

@@ -31,11 +31,11 @@
  */
 #ifndef FLATHEADERS
 #include "simple_message/socket/tcp_client.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "tcp_client.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
+#include <netdb.h>
 
 namespace industrial
 {
@@ -49,7 +49,7 @@ TcpClient::TcpClient()
 
 TcpClient::~TcpClient()
 {
-  LOG_DEBUG("Destructing TCPClient");
+  //RCLCPP_DEBUG(rclcpp::get_logger("tcp_client"), "Destructing TCPClient");
 }
 
 bool TcpClient::init(char *buff, int port_num)
@@ -92,7 +92,7 @@ bool TcpClient::makeConnect()
 {
   if (isConnected())
   {
-    LOG_WARN("Tried to connect when socket already in connected state");
+    //RCLCPP_WARN(rclcpp::get_logger("tcp_client"), "Tried to connect when socket already in connected state");
     return false;
   }
 
@@ -109,7 +109,7 @@ bool TcpClient::makeConnect()
     return false;
   }
 
-  LOG_INFO("Connected to server");
+  RCLCPP_INFO(rclcpp::get_logger("tcp_client"), "Connected to server");
   setConnected(true);
 
   return true;
@@ -135,7 +135,7 @@ bool TcpClient::connectSocketHandle()
   setSockHandle(sock_handle);
   if (SOCKET_FAIL == sock_handle)
   {
-    LOG_ERROR("Failed to create socket");
+    //RCLCPP_ERROR(rclcpp::get_logger("tcp_client"), "Failed to create socket");
     return false;
   }
 
@@ -143,7 +143,7 @@ bool TcpClient::connectSocketHandle()
   // The set no delay disables the NAGEL algorithm
   if (SOCKET_FAIL == SET_NO_DELAY(sock_handle, disableNodeDelay))
   {
-    LOG_WARN("Failed to set no socket delay, sending data can be delayed by up to 250ms");
+    //RCLCPP_WARN(rclcpp::get_logger("tcp_client"), "Failed to set no socket delay, sending data can be delayed by up to 250ms");
   }
   return true;
 }

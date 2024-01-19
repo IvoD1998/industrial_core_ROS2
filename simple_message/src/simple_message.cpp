@@ -31,15 +31,15 @@
 
 #ifndef FLATHEADERS
 #include "simple_message/simple_message.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "simple_message.h"
-#include "log_wrapper.h"
 #endif
 
 #ifdef SIMPLE_MESSAGE_MOTOPLUS
 #include "motoPlus.h"
 #endif
+
+#include "rclcpp/rclcpp.hpp"
 
 
 using namespace industrial::byte_array;
@@ -69,8 +69,7 @@ bool SimpleMessage::init(int msgType, int commType, int replyCode)
 
 bool SimpleMessage::init(int msgType, int commType, int replyCode, ByteArray & data )
 {
-  LOG_COMM("SimpleMessage::init(type: %d, comm: %d, reply: %d, data[%d]...)",
-            msgType, commType, replyCode, data.getBufferSize());
+  //RCLCPP_INFO(rclcpp::get_logger("simple_message"), "SimpleMessage::init(type: %d, comm: %d, reply: %d, data[%d]...)", msgType, commType, replyCode, data.getBufferSize());
   this->setMessageType(msgType);
   this->setCommType(commType);
   this->setReplyCode(replyCode);
@@ -91,20 +90,19 @@ bool SimpleMessage::init(ByteArray & msg)
     if (msg.getBufferSize() > this->getHeaderSize())
     {
       dataSize = msg.getBufferSize() - this->getHeaderSize();
-      LOG_COMM("Unloading data portion of message: %d bytes", dataSize);
+      //RCLCPP_INFO(rclcpp::get_logger("simple_message"), "Unloading data portion of message: %d bytes", dataSize);
       msg.unload(this->data_, dataSize);
     }
-    LOG_COMM("Unloading header data");
+    //RCLCPP_INFO(rclcpp::get_logger("simple_message"), "Unloading header data");
     msg.unload(this->reply_code_);
     msg.unload(this->comm_type_);
     msg.unload(this->message_type_);
-    LOG_COMM("SimpleMessage::init(type: %d, comm: %d, reply: %d, data[%d]...)",
-              this->message_type_, this->comm_type_, this->reply_code_, this->data_.getBufferSize());
+    //RCLCPP_INFO(rclcpp::get_logger("simple_message"), "SimpleMessage::init(type: %d, comm: %d, reply: %d, data[%d]...)", this->message_type_, this->comm_type_, this->reply_code_, this->data_.getBufferSize());
     rtn = this->validateMessage();
   }
   else
   {
-    LOG_ERROR("Failed to init message, buffer size too small: %u", msg.getBufferSize());
+    //RCLCPP_ERROR(rclcpp::get_logger("simple_message"), "Failed to init message, buffer size too small: %u", msg.getBufferSize());
     rtn = false;
   }
   return rtn;
@@ -136,13 +134,13 @@ bool SimpleMessage::validateMessage()
 
   if ( StandardMsgTypes::INVALID == this->getMessageType())
   {
-    LOG_WARN("Invalid message type: %u", this->getMessageType());
+    //RCLCPP_WARN(rclcpp::get_logger("simple_message"), "Invalid message type: %u", this->getMessageType());
     return false;
   }
 
   if ( CommTypes::INVALID == this->getCommType())
   {
-    LOG_WARN("Invalid comms. type: %u", this->getCommType());
+    //RCLCPP_WARN(rclcpp::get_logger("simple_message"), "Invalid comms. type: %u", this->getCommType());
     return false;
   }
 
@@ -153,16 +151,12 @@ bool SimpleMessage::validateMessage()
               ReplyTypes::INVALID != this->getReplyCode()))
   )
   {
-    LOG_WARN("Invalid reply. Comm type: %u, Reply type: %u",
-             this->getCommType(), this->getReplyCode());
+    //RCLCPP_WARN(rclcpp::get_logger("simple_message"), "Invalid reply. Comm type: %u, Reply type: %u", this->getCommType(), this->getReplyCode());
     return false;
   }
 
   return true;
 }
-
-
-
 	
 } // namespace simple_message
 } // namespace industrial

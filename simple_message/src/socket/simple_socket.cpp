@@ -31,11 +31,10 @@
 
 #ifndef FLATHEADERS
 #include "simple_message/socket/simple_socket.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "simple_socket.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::byte_array;
 using namespace industrial::shared_types;
@@ -75,7 +74,7 @@ namespace industrial
         }
         else
         {
-          LOG_ERROR("Buffer size: %u, is greater than max socket size: %u", buffer.getBufferSize(), this->MAX_BUFFER_SIZE);
+          //RCLCPP_ERROR(rclcpp::get_logger("simple_socket"), "Buffer size: %u, is greater than max socket size: %u", buffer.getBufferSize(), this->MAX_BUFFER_SIZE);
           rtn = false;
         }
 
@@ -83,7 +82,7 @@ namespace industrial
       else
       {
         rtn = false;
-        LOG_WARN("Not connected, bytes not sent");
+        //RCLCPP_WARN(rclcpp::get_logger("simple_socket"), "Not connected, bytes not sent");
       }
 
       if (!rtn)
@@ -113,8 +112,7 @@ namespace industrial
       // what can be received by the socket.
       if (this->MAX_BUFFER_SIZE > buffer.getMaxBufferSize())
       {
-        LOG_WARN("Socket buffer max size: %u, is larger than byte array buffer: %u",
-            this->MAX_BUFFER_SIZE, buffer.getMaxBufferSize());
+        //RCLCPP_WARN(rclcpp::get_logger("simple_socket"), "Socket buffer max size: %u, is larger than byte array buffer: %u", this->MAX_BUFFER_SIZE, buffer.getMaxBufferSize());
       }
       if (this->isConnected())
       {
@@ -138,7 +136,7 @@ namespace industrial
               }
               else if (0 == rc)
               {
-                LOG_WARN("Recieved zero bytes: %u", rc);
+                //RCLCPP_WARN(rclcpp::get_logger("simple_socket"), "Recieved zero bytes: %u", rc);
                 remainBytes = 0;
                 rtn = false;
                 break;
@@ -147,8 +145,7 @@ namespace industrial
               {
                 remainBytes = remainBytes - rc;
                 remainTimeMs = timeout_ms;  // Reset the timeout on successful read
-                LOG_COMM("Byte array receive, bytes read: %u, bytes reqd: %u, bytes left: %u",
-                    rc, num_bytes, remainBytes);
+                //RCLCPP_INFO(rclcpp::get_logger("simple_socket"), "Byte array receive, bytes read: %u, bytes reqd: %u, bytes left: %u", rc, num_bytes, remainBytes);
                 buffer.load(&this->buffer_, rc);
                 if (remainBytes <= 0) {
                   rtn = true;
@@ -157,13 +154,13 @@ namespace industrial
             }
             else if(error)
             {
-              LOG_ERROR("Socket poll returned an error");
+              //RCLCPP_ERROR(rclcpp::get_logger("simple_socket"), "Socket poll returned an error");
               rtn = false;
               break;
             }
             else
             {
-              LOG_ERROR("Uknown error from socket poll");
+              //RCLCPP_ERROR(rclcpp::get_logger("simple_socket"), "Uknown error from socket poll");
               rtn = false;
               break;
             }
@@ -171,13 +168,13 @@ namespace industrial
           else
           {
             remainTimeMs = remainTimeMs - this->SOCKET_POLL_TO;
-            LOG_COMM("Socket poll timeout, trying again");
+            //RCLCPP_INFO(rclcpp::get_logger("simple_socket"), "Socket poll timeout, trying again");
           }
         }
       }
       else
-      {
-        LOG_WARN("Not connected, bytes not received");
+      { 
+        //RCLCPP_WARN(rclcpp::get_logger("simple_socket"), "Not connected, bytes not received");
         rtn = false;
       }
 

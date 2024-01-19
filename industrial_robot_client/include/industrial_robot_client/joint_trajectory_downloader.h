@@ -33,6 +33,7 @@
 #define JOINT_TRAJECTORY_DOWNLOADER_H
 
 #include "industrial_robot_client/joint_trajectory_interface.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial_robot_client
 {
@@ -50,7 +51,7 @@ class JointTrajectoryDownloader : public JointTrajectoryInterface
 {
 
 public:
-
+  JointTrajectoryDownloader();
   bool send_to_robot(const std::vector<JointTrajPtMessage>& messages);
 
 };

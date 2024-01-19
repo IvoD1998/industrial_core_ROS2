@@ -30,12 +30,11 @@
  */
 #ifndef FLATHEADERS
 #include "simple_message/socket/udp_client.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "udp_client.h"
-#include "log_wrapper.h"
 #endif
-
+#include "rclcpp/rclcpp.hpp"
+#include <netdb.h>
 
 using namespace industrial::byte_array;
 using namespace industrial::shared_types;
@@ -98,7 +97,7 @@ bool UdpClient::init(char *buff, int port_num)
   }
   else
   {
-    LOG_ERROR("Failed to create socket, rc: %d", rc);
+    //RCLCPP_ERROR(rclcpp::get_logger("udp_client"), "Failed to create socket, rc: %d", rc);
     rtn = false;
   }
   return rtn;
@@ -129,18 +128,18 @@ bool UdpClient::makeConnect()
     {
       ByteArray recv;
       recvHS = 0;
-      LOG_DEBUG("UDP client sending handshake");
+      //RCLCPP_DEBUG(rclcpp::get_logger("udp_client"), "UDP client sending handshake");
       this->rawSendBytes(localBuffer.data(), sendLen);
       if (this->isReadyReceive(timeout))
       {
         bytesRcvd = this->rawReceiveBytes(this->buffer_, 0);
- 	LOG_DEBUG("UDP client received possible handshake");	
+ 	      //RCLCPP_DEBUG(rclcpp::get_logger("udp_client"), "UDP client received possible handshake");	
         recv.init(&this->buffer_[0], bytesRcvd);
         recv.unload((void*)&recvHS, sizeof(recvHS));
       }
     }
     while(recvHS != sendHS);
-    LOG_INFO("UDP client connected");
+    //RCLCPP_INFO(rclcpp::get_logger("udp_client"), "UDP client connected");
     rtn = true;
     this->setConnected(true);
     
@@ -148,7 +147,7 @@ bool UdpClient::makeConnect()
   else
   {
     rtn = true;
-    LOG_WARN("Tried to connect when socket already in connected state");
+    //RCLCPP_WARN(rclcpp::get_logger("udp_client"), "Tried to connect when socket already in connected state");
   }
 
   return rtn;

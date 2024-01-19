@@ -34,7 +34,7 @@
 
 #include <vector>
 #include <string>
-#include "urdf/model.h"
+#include "urdf_extention/model_extention.hpp"
 
 namespace industrial_utils
 {

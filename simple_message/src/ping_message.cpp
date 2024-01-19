@@ -30,13 +30,12 @@
 */ 
 #ifndef FLATHEADERS
 #include "simple_message/ping_message.h"
-#include "simple_message/log_wrapper.h"
 #include "simple_message/byte_array.h"
 #else
 #include "ping_message.h"
-#include "log_wrapper.h"
 #include "byte_array.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::simple_message;
 using namespace industrial::byte_array;
@@ -68,8 +67,7 @@ bool PingMessage::init(SimpleMessage & msg)
   }
   else
   {
-    LOG_ERROR("Failed to initialize message, wrong type: %d, expected %d",
-              msg.getMessageType(), this->getMessageType());
+    //RCLCPP_ERROR(rclcpp::get_logger("ping_manager"), "Failed to initialize message, wrong type: %d, expected %d", msg.getMessageType(), this->getMessageType());
     rtn = false;
   }
 

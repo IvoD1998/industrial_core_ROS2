@@ -31,12 +31,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/joint_data.h"
 #include "simple_message/shared_types.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_data.h"
 #include "shared_types.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::shared_types;
 
@@ -73,7 +72,7 @@ bool JointData::setJoint(shared_int index, shared_real value)
   }
   else
   {
-    LOG_ERROR("Joint index: %d, is greater than size: %d", index, this->getMaxNumJoints());
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_data"), "Joint index: %d, is greater than size: %d", index, this->getMaxNumJoints());
     rtn = false;
   }
   return rtn;
@@ -90,7 +89,7 @@ bool JointData::getJoint(shared_int index, shared_real & value) const
   }
   else
   {
-    LOG_ERROR("Joint index: %d, is greater than size: %d", index, this->getMaxNumJoints());
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_data"), "Joint index: %d, is greater than size: %d", index, this->getMaxNumJoints());
     rtn = false;
   }
   return rtn;
@@ -140,14 +139,14 @@ bool JointData::load(industrial::byte_array::ByteArray *buffer)
   bool rtn = false;
   shared_real value = 0.0;
 
-  LOG_COMM("Executing joint position load");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_data"), "Executing joint position load");
   for (int i = 0; i < this->getMaxNumJoints(); i++)
   {
     this->getJoint(i, value);
     rtn = buffer->load(value);
     if (!rtn)
     {
-      LOG_ERROR("Failed to load joint position data");
+      //RCLCPP_ERROR(rclcpp::get_logger("joint_data"), "Failed to load joint position data");
       break;
     }
   }
@@ -159,13 +158,13 @@ bool JointData::unload(industrial::byte_array::ByteArray *buffer)
   bool rtn = false;
   shared_real value = 0.0;
 
-  LOG_COMM("Executing joint position unload");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_data"), "Executing joint position unload");
   for (int i = this->getMaxNumJoints() - 1; i >= 0; i--)
   {
     rtn = buffer->unload(value);
     if (!rtn)
     {
-      LOG_ERROR("Failed to unload message joint: %d from data[%d]", i, buffer->getBufferSize());
+      //RCLCPP_ERROR(rclcpp::get_logger("joint_data"), "Failed to unload message joint: %d from data[%d]", i, buffer->getBufferSize());
       break;
     }
     this->setJoint(i, value);

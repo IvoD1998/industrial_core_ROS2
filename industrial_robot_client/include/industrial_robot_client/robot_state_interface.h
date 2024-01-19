@@ -35,12 +35,14 @@
 
 #include <vector>
 #include <string>
+
 #include "simple_message/smpl_msg_connection.h"
 #include "simple_message/message_manager.h"
 #include "simple_message/message_handler.h"
 #include "simple_message/socket/tcp_client.h"
 #include "industrial_robot_client/joint_relay_handler.h"
 #include "industrial_robot_client/robot_status_relay_handler.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial_robot_client
 {
@@ -63,7 +65,7 @@ namespace StandardSocketPorts = industrial::simple_socket::StandardSocketPorts;
  * to implement robot-specific behavior.
  */
 //* RobotStateInterface
-class RobotStateInterface
+class RobotStateInterface : public rclcpp::Node
 {
 
 public:
@@ -93,7 +95,7 @@ public:
    *
    * \return true on success, false otherwise
    */
-  bool init(SmplMsgConnection* connection);
+  bool init(industrial::smpl_msg_connection::SmplMsgConnection *connection);
 
   /**
    * \brief Initialize robot connection using specified method and joint-names.
@@ -105,7 +107,8 @@ public:
    *
    * \return true on success, false otherwise
    */
-  bool init(SmplMsgConnection* connection, std::vector<std::string>& joint_names);
+  bool init(industrial::smpl_msg_connection::SmplMsgConnection* connection, 
+            std::vector<std::string>& joint_names);
 
   /**
    * \brief Begin processing messages and publishing topics.
@@ -117,7 +120,7 @@ public:
    *
    * \return current robot connection object
    */
-  SmplMsgConnection* get_connection()
+  industrial::smpl_msg_connection::SmplMsgConnection* get_connection()
   {
     return this->connection_;
   }
@@ -127,7 +130,7 @@ public:
    *
    * \return current message-manager object
    */
-  MessageManager* get_manager()
+  industrial::message_manager::MessageManager* get_manager()
   {
     return &this->manager_;
   }
@@ -144,7 +147,8 @@ public:
    * \param new message-handler for a specific msg-type (ALREADY INITIALIZED).
    * \param replace existing handler (of same msg-type), if exists
    */
-  void add_handler(MessageHandler* handler, bool allow_replace = true)
+  void add_handler(industrial::message_handler::MessageHandler* handler, 
+                   bool allow_replace = true)
   {
     this->manager_.add(handler, allow_replace);
   }

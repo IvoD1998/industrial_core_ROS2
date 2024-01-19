@@ -31,19 +31,19 @@
 #ifndef FLATHEADERS
 #include "simple_message/robot_status.h"
 #include "simple_message/shared_types.h"
-#include "simple_message/log_wrapper.h"
+
 #else
-#include "robot_status.h"
-#include "shared_types.h"
-#include "log_wrapper.h"
+#include "robot_status.hpp"
+#include "shared_types.hpp"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 // remove ROS after Melodic (bw compat for #262)
 #if defined(SIMPLE_MESSAGE_USE_ROS) || defined(ROS)
 // Files below used to translate between ROS messages enums and
 // enums defined in this file
-#include "industrial_msgs/RobotMode.h"
-#include "industrial_msgs/TriState.h"
+#include "industrial_msgs/msg/robot_mode.hpp"
+#include "industrial_msgs/msg/tri_state.hpp"
 #endif
 
 using namespace industrial::shared_types;
@@ -65,15 +65,15 @@ int toROSMsgEnum(RobotModes::RobotMode mode)
   switch (mode)
   {
     case RobotModes::AUTO:
-      return industrial_msgs::RobotMode::AUTO;
+      return industrial_msgs::msg::RobotMode::AUTO;
       break;
     case RobotModes::MANUAL:
-      return industrial_msgs::RobotMode::MANUAL;
+      return industrial_msgs::msg::RobotMode::MANUAL;
       break;
     case RobotModes::UNKNOWN:
-      return industrial_msgs::RobotMode::UNKNOWN;
+      return industrial_msgs::msg::RobotMode::UNKNOWN;
   }
-  return industrial_msgs::RobotMode::UNKNOWN;
+  return industrial_msgs::msg::RobotMode::UNKNOWN;
 
 }
 ;
@@ -94,16 +94,16 @@ int toROSMsgEnum(TriStates::TriState state)
   switch (state)
   {
     case TriStates::TS_UNKNOWN:
-      return industrial_msgs::TriState::UNKNOWN;
+      return industrial_msgs::msg::TriState::UNKNOWN;
       break;
     case TriStates::TS_TRUE:
-      return industrial_msgs::TriState::TRUE;
+      return industrial_msgs::msg::TriState::TRUE;
       break;
     case TriStates::TS_FALSE:
-      return industrial_msgs::TriState::FALSE;
+      return industrial_msgs::msg::TriState::FALSE;
       break;
   }
-  return industrial_msgs::TriState::UNKNOWN;
+  return industrial_msgs::msg::TriState::UNKNOWN;
 
 }
 ;
@@ -161,19 +161,19 @@ bool RobotStatus::load(industrial::byte_array::ByteArray *buffer)
 {
   bool rtn = false;
 
-  LOG_COMM("Executing robot status load");
+  //RCLCPP_INFO(rclcpp::get_logger("robot_status"), "Executing robot status load");
 
   if (buffer->load(this->drives_powered_) && buffer->load(this->e_stopped_) && buffer->load(this->error_code_)
       && buffer->load(this->in_error_) && buffer->load(this->in_motion_) && buffer->load(this->mode_)
       && buffer->load(this->motion_possible_))
   {
 
-    LOG_COMM("Robot status successfully loaded");
+    //RCLCPP_INFO(rclcpp::get_logger("robot_status"), "Robot status successfully loaded");
     rtn = true;
   }
   else
   {
-    LOG_COMM("Robot status not loaded");
+    //RCLCPP_INFO(rclcpp::get_logger("robot_status"), "Robot status not loaded");
     rtn = false;
   }
 
@@ -184,19 +184,19 @@ bool RobotStatus::unload(industrial::byte_array::ByteArray *buffer)
 {
   bool rtn = false;
 
-  LOG_COMM("Executing robot status unload");
+  //RCLCPP_INFO(rclcpp::get_logger("robot_status"), "Executing robot status unload");
   if (buffer->unload(this->motion_possible_) && buffer->unload(this->mode_) && buffer->unload(this->in_motion_)
       && buffer->unload(this->in_error_) && buffer->unload(this->error_code_) && buffer->unload(this->e_stopped_)
       && buffer->unload(this->drives_powered_))
   {
 
     rtn = true;
-    LOG_COMM("Robot status successfully unloaded");
+    //RCLCPP_INFO(rclcpp::get_logger("robot_status"), "Robot status successfully unloaded");
   }
 
   else
   {
-    LOG_ERROR("Failed to unload robot status");
+    //RCLCPP_ERROR(rclcpp::get_logger("robot_status"), "Failed to unload robot status");
     rtn = false;
   }
 

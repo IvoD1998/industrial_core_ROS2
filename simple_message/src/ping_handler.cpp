@@ -31,12 +31,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/ping_handler.h"
 #include "simple_message/ping_message.h"
-#include "simple_message/log_wrapper.h"
 #else
-#include "ping_handler.h"
-#include "ping_message.h"
-#include "log_wrapper.h"
+#include "ping_handler.hpp"
+#include "ping_message.hpp"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::ping_message;
 using namespace industrial::simple_message;
@@ -64,24 +63,24 @@ bool PingHandler::internalCB(industrial::simple_message::SimpleMessage & in)
     {
       if(this->getConnection()->sendMsg(msg))
       {
-        LOG_INFO("Ping return sent");
+        //RCLCPP_INFO(rclcpp::get_logger("ping_handler"), "Ping return sent");
         rtn = true;
       }
       else
       {
-        LOG_ERROR("Failed to send ping return");
+        //RCLCPP_ERROR(rclcpp::get_logger("ping_handler"), "Failed to send ping return");
         rtn = false;
       }
     }
     else
     {
-      LOG_ERROR("Failed to generate ping reply message");
+      //RCLCPP_ERROR(rclcpp::get_logger("ping_handler"), "Failed to generate ping reply message");
       rtn = false;
     }
   }
   else
   {
-    LOG_ERROR("Failed to initialize ping message");
+    //RCLCPP_ERROR(rclcpp::get_logger("ping_handler"), "Failed to initialize ping message");
     rtn = false;
   }
 

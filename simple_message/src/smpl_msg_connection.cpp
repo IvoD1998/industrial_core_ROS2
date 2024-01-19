@@ -30,14 +30,13 @@
  */
 
 #ifndef FLATHEADERS
-#include "simple_message/log_wrapper.h"
 #include "simple_message/smpl_msg_connection.h"
 #include "simple_message/byte_array.h"
 #else
-#include "log_wrapper.h"
 #include "smpl_msg_connection.h"
 #include "byte_array.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 #ifdef SIMPLE_MESSAGE_MOTOPLUS
 #include "motoPlus.h"
@@ -70,7 +69,7 @@ bool SmplMsgConnection::sendMsg(SimpleMessage & message)
   else
   {
     rtn = false;
-    LOG_ERROR("Message validation failed, message not sent");
+    //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Message validation failed, message not sent");
   }
 
 return rtn;
@@ -97,7 +96,7 @@ bool SmplMsgConnection::receiveMsg(SimpleMessage & message, shared_int timeout_m
   if (rtn)
   {
     rtn = lengthBuffer.unload(length);
-    LOG_COMM("Message length: %d", length);
+    //RCLCPP_INFO(rclcpp::get_logger("smpl_msg_connection"), "Message length: %d", length);
 
     if (rtn)
     {
@@ -109,20 +108,20 @@ bool SmplMsgConnection::receiveMsg(SimpleMessage & message, shared_int timeout_m
       }
       else
       {
-        LOG_ERROR("Failed to initialize message");
+        //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Failed to initialize message");
         rtn = false;
       }
 
     }
     else
     {
-      LOG_ERROR("Failed to receive message");
+      //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Failed to receive message");
       rtn = false;
     }
   }
   else
   {
-    LOG_ERROR("Failed to receive message length");
+    //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Failed to receive message length");
     rtn = false;
   }
 
@@ -143,11 +142,11 @@ bool SmplMsgConnection::sendAndReceiveMsg(SimpleMessage & send, SimpleMessage & 
   if (rtn)
   {
     if(verbose) {
-      LOG_ERROR("Sent message");
+      //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Sent message");
     }
     rtn = this->receiveMsg(recv, timeout_ms);
     if(verbose) {
-      LOG_ERROR("Got message");
+      //RCLCPP_ERROR(rclcpp::get_logger("smpl_msg_connection"), "Got message");
     }
   }
   else
@@ -157,7 +156,6 @@ bool SmplMsgConnection::sendAndReceiveMsg(SimpleMessage & send, SimpleMessage & 
 
   return rtn;
 }
-
 
 }//smpl_msg_connection
 }//industrial

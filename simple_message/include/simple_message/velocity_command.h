@@ -1,7 +1,7 @@
 /*
  * Software License Agreement (BSD License)
  *
- * Copyright (c) 2011, Southwest Research Institute
+ * Copyright (c) 2013, Southwest Research Institute
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,62 +28,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef VELOCITY_COMMAND_H
+#define VELOCITY_COMMAND_H
 
-#ifndef N_POINT_FILTER_H_
-#define N_POINT_FILTER_H_
+#include "simple_message/byte_array.h"
+#include "simple_message/shared_types.h"
+#include "simple_message/simple_serialize.h"
 
-#include <industrial_trajectory_filters/filter_base.h>
-
-namespace industrial_trajectory_filters
+namespace industrial
+{
+namespace velocity_command
 {
 
-/**
- * @brief This is a simple filter which reduces a trajectory to N points or less
- */
-template<typename T>
+class VelocityCommand : public industrial::simple_serialize::SimpleSerialize
+{
+public:
+  VelocityCommand();
 
-  class NPointFilter : public industrial_trajectory_filters::FilterBase<T>
+  ~VelocityCommand();
+
+  void init(void);
+
+  /**
+   * Overrides - SimpleSerialize
+   */
+  unsigned int byteLength()
   {
-  public:
-    /**
-     * @brief Default constructor
-     */
-    NPointFilter();
-    /**
-     * @brief Default destructor
-     */
-    ~NPointFilter();
-    ;
+    return 2 * sizeof(industrial::shared_types::shared_int) +
+           MAX_NUM_JOINTS * sizeof(industrial::shared_types::shared_real);
+  }
 
-    virtual bool configure();
+  bool load(industrial::byte_array::ByteArray* buffer);
+  bool unload(industrial::byte_array::ByteArray* buffer);
 
-    // \brief Reduces a trajectory to N points or less.  The resulting trajectory
-    // contains only point within the original trajectory (no interpolation is done
-    // between points).
+  static const std::size_t MAX_NUM_JOINTS = 6;
 
-    /**
-     * \brief Reduces a trajectory to N points or less.  The resulting trajectory
-     * contains only point within the original trajectory (no interpolation is done
-     *  between points).
-     * @param trajectory_in input trajectory
-     * @param trajectory_out filtered trajectory (N points or less
-     * @return true if successful
-     */
-    bool update(const T& trajectory_in, T& trajectory_out);
+  industrial::shared_types::shared_int sequence_;
+  industrial::shared_types::shared_real vector_[MAX_NUM_JOINTS];
+  industrial::shared_types::shared_int type_;
+};
 
-  private:
-    /**
-     * @brief number of points to reduce trajectory to
-     */
-    int n_points_;
+}  // namespace industrial
+}  // namespace velocity_command
 
-  };
-
-/**
- * @brief Specializing trajectory filter implementation
- */
-typedef NPointFilter<MessageAdapter> NPointFilterAdapter;
-
-}
-
-#endif
+#endif /* VELOCITY_COMMAND_H */

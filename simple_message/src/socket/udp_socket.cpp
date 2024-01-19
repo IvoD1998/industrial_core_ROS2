@@ -31,13 +31,12 @@
 
 #ifndef FLATHEADERS
 #include "simple_message/socket/udp_socket.h"
-#include "simple_message/log_wrapper.h"
 #include "simple_message/simple_message.h"
 #else
 #include "udp_socket.h"
-#include "log_wrapper.h"
 #include "simple_message.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 
 using namespace industrial::smpl_msg_connection;
@@ -144,7 +143,7 @@ bool UdpSocket::rawPoll(int timeout, bool & ready, bool & error)
         rtn = true;
       }
       else {
-        LOG_WARN("Select returned, but no flags are set");
+        //RCLCPP_WARN(rclcpp::get_logger("udp_socket"), "Select returned, but no flags are set");
         rtn = false;
       }
     }

@@ -30,11 +30,10 @@
  */
 #ifndef FLATHEADERS
 #include "simple_message/socket/tcp_server.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "tcp_server.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial
 {
@@ -66,8 +65,8 @@ bool TcpServer::init(int port_num)
   if (this->SOCKET_FAIL != rc)
   {
     this->setSrvrHandle(rc);
-    LOG_DEBUG("Socket created, rc: %d", rc);
-    LOG_DEBUG("Socket handle: %d", this->getSrvrHandle());
+    //RCLCPP_DEBUG(rclcpp::get_logger("tcp_server"), "Socket created, rc: %d", rc);
+    //RCLCPP_DEBUG(rclcpp::get_logger("tcp_server"), "Socket handle: %d", this->getSrvrHandle());
 
     
     SET_REUSE_ADDR(this->getSrvrHandle(), reuse_addr);
@@ -83,24 +82,24 @@ bool TcpServer::init(int port_num)
 
     if (this->SOCKET_FAIL != rc)
     {
-      LOG_INFO("Server socket successfully initialized");
+      RCLCPP_INFO(rclcpp::get_logger("tcp_server"), "Server socket successfully initialized");
 
       rc = LISTEN(this->getSrvrHandle(), 1);
 
       if (this->SOCKET_FAIL != rc)
       {
-        LOG_INFO("Socket in listen mode");
+       RCLCPP_DEBUG(rclcpp::get_logger("tcp_server"), "Socket in listen mode");
         rtn = true;
       }
       else
       {
-        LOG_ERROR("Failed to set socket to listen");
+        //RCLCPP_ERROR(rclcpp::get_logger("tcp_server"), "Failed to set socket to listen");
         rtn = false;
       }
     }
     else
     {
-      LOG_ERROR("Failed to bind socket, rc: %d", rc);
+      //RCLCPP_ERROR(rclcpp::get_logger("tcp_server"), "Failed to bind socket, rc: %d", rc);
       CLOSE(this->getSrvrHandle());
       rtn = false;
     }
@@ -108,7 +107,7 @@ bool TcpServer::init(int port_num)
   }
   else
   {
-    LOG_ERROR("Failed to create socket, rc: %d", rc);
+    //RCLCPP_ERROR(rclcpp::get_logger("tcp_server"), "Failed to create socket, rc: %d", rc);
     rtn = false;
   }
 
@@ -137,27 +136,27 @@ bool TcpServer::makeConnect()
     if (this->SOCKET_FAIL != rc)
     {
       this->setSockHandle(rc);
-      LOG_INFO("Client socket accepted");
+      //RCLCPP_INFO(rclcpp::get_logger("tcp_server"), "Client socket accepted");
 
       // The set no delay disables the NAGEL algorithm
       rc = SET_NO_DELAY(this->getSockHandle(), disableNodeDelay);
       err = errno;
       if (this->SOCKET_FAIL == rc)
       {
-        LOG_WARN("Failed to set no socket delay, errno: %d, sending data can be delayed by up to 250ms", err);
+        //RCLCPP_WARN(rclcpp::get_logger("tcp_server"), "Failed to set no socket delay, errno: %d, sending data can be delayed by up to 250ms", err);
       }
       this->setConnected(true);
       rtn = true;
     }
     else
     {
-      LOG_ERROR("Failed to accept for client connection");
+      //RCLCPP_ERROR(rclcpp::get_logger("tcp_server"), "Failed to accept for client connection");
       rtn = false;
     }
   }
   else
   {
-    LOG_WARN("Tried to connect when socket already in connected state");
+    //RCLCPP_WARN(rclcpp::get_logger("tcp_server"), "Tried to connect when socket already in connected state");
   }
 
   return rtn;

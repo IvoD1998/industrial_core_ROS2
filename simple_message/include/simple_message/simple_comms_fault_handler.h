@@ -35,12 +35,11 @@
 #ifndef FLATHEADERS
 #include "simple_message/comms_fault_handler.h"
 #include "simple_message/smpl_msg_connection.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "comms_fault_handler.h"
 #include "smpl_msg_connection.h"
-#include "log_wrapper.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 namespace industrial
 {
@@ -84,13 +83,13 @@ public:
       * \brief Send failure callback method: Nothing is performed
       *
       */
-     void sendFailCB() {LOG_WARN("Send failure, no callback support");};
+     void sendFailCB() {RCLCPP_WARN(rclcpp::get_logger("simple_comms_fault_handler"), "Send failure, no callback support");};
 
      /**
       * \brief Receive failure callback method: Nothing is performed
       *
       */
-     void receiveFailCB() {LOG_WARN("Receive failure, no callback support");};
+     void receiveFailCB() {RCLCPP_WARN(rclcpp::get_logger("simple_comms_fault_handler"), "Receive failure, no callback support");};
 
      /**
       * \brief Connection failure callback method: On a connection failure

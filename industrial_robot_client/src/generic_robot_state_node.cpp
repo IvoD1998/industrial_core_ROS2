@@ -36,13 +36,17 @@ using industrial_robot_client::robot_state_interface::RobotStateInterface;
 int main(int argc, char** argv)
 {
   // initialize node
-  ros::init(argc, argv, "state_interface");
+  rclcpp::init(argc, argv);
 
   // launch the default Robot State Interface connection/handlers
-  RobotStateInterface rsi;
-  if (rsi.init())
+  std::shared_ptr<RobotStateInterface> rsi = std::make_shared<RobotStateInterface>();
+  if(rsi->init())
   {
-    rsi.run();
+    rsi->run();
   }
+
+  rclcpp::spin(rsi);
+  rclcpp::shutdown();
+  
   return 0;
 }

@@ -2,6 +2,10 @@
 Changelog for package industrial_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.8.0 (2024-01-19)
+------------------
+* conversion to ROS2
+
 0.7.3 (2021-07-15)
 ------------------
 * No changes

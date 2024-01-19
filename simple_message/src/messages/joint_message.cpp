@@ -33,13 +33,13 @@
 #include "simple_message/messages/joint_message.h"
 #include "simple_message/joint_data.h"
 #include "simple_message/byte_array.h"
-#include "simple_message/log_wrapper.h"
 #else
 #include "joint_message.h"
 #include "joint_data.h"
 #include "byte_array.h"
-#include "log_wrapper.h"
 #endif
+
+#include "rclcpp/rclcpp.hpp"
 
 using namespace industrial::shared_types;
 using namespace industrial::byte_array;
@@ -78,12 +78,12 @@ bool JointMessage::init(industrial::simple_message::SimpleMessage & msg)
     else
     {
       rtn = false;
-      LOG_ERROR("Failed to unload sequence data");
+      //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to unload sequence data");
     }
   }
   else
   {
-    LOG_ERROR("Failed to unload joint data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to unload joint data");
   }
   return rtn;
 }
@@ -108,7 +108,7 @@ void JointMessage::init()
 bool JointMessage::load(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing joint message load");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_message"), "Executing joint message load");
   if (buffer->load(this->getSequence()))
   {
 
@@ -119,13 +119,13 @@ bool JointMessage::load(ByteArray *buffer)
     else
     {
       rtn = false;
-      LOG_ERROR("Failed to load sequence data");
+      //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to load sequence data");
     }
   }
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to load sequence data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to load sequence data");
   }
   return rtn;
 }
@@ -133,7 +133,7 @@ bool JointMessage::load(ByteArray *buffer)
 bool JointMessage::unload(ByteArray *buffer)
 {
   bool rtn = false;
-  LOG_COMM("Executing joint message unload");
+  //RCLCPP_INFO(rclcpp::get_logger("joint_message"), "Executing joint message unload");
 
   if (buffer->unload(this->joints_))
   {
@@ -145,13 +145,13 @@ bool JointMessage::unload(ByteArray *buffer)
     else
     {
       rtn = false;
-      LOG_ERROR("Failed to unload sequence data");
+      //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to unload sequence data");
     }
   }
   else
   {
     rtn = false;
-    LOG_ERROR("Failed to unload joint data");
+    //RCLCPP_ERROR(rclcpp::get_logger("joint_message"), "Failed to unload joint data");
   }
   return rtn;
 }

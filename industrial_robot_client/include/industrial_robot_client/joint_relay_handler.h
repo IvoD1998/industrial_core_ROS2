@@ -36,9 +36,9 @@
 #include <string>
 #include <vector>
 
-#include "ros/ros.h"
-#include "control_msgs/FollowJointTrajectoryFeedback.h"
-#include "sensor_msgs/JointState.h"
+#include "rclcpp/rclcpp.hpp"
+#include "control_msgs/action/follow_joint_trajectory.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 #include "simple_message/message_handler.h"
 #include "simple_message/messages/joint_message.h"
 
@@ -58,7 +58,7 @@ using industrial::simple_message::SimpleMessage;
  * THIS CLASS IS NOT THREAD-SAFE
  *
  */
-class JointRelayHandler : public industrial::message_handler::MessageHandler
+class JointRelayHandler : public industrial::message_handler::MessageHandler, public rclcpp::Node
 {
   // since this class defines a different init(), this helps find the base-class init()
   using industrial::message_handler::MessageHandler::init;
@@ -68,7 +68,7 @@ public:
   /**
 * \brief Constructor
 */
-  JointRelayHandler() {};
+  JointRelayHandler();
 
 
  /**
@@ -81,16 +81,10 @@ public:
   *
   * \return true on success, false otherwise (an invalid message type)
   */
- bool init(industrial::smpl_msg_connection::SmplMsgConnection* connection, std::vector<std::string> &joint_names);
+ bool init(industrial::smpl_msg_connection::SmplMsgConnection* connection, 
+           std::vector<std::string> &joint_names);
 
 protected:
-
-  std::vector<std::string> all_joint_names_;
-
-  ros::Publisher pub_joint_control_state_;
-  ros::Publisher pub_joint_sensor_state_;
-  ros::NodeHandle node_;
-
   /**
    * \brief Convert joint message into publish message-types
    *
@@ -100,9 +94,9 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool create_messages(JointMessage& msg_in,
-                               control_msgs::FollowJointTrajectoryFeedback* control_state,
-                               sensor_msgs::JointState* sensor_state);
+  virtual bool create_messages(industrial::joint_message::JointMessage &msg_in,
+                               control_msgs::action::FollowJointTrajectory_FeedbackMessage *control_state,
+                               sensor_msgs::msg::JointState *sensor_state);
 
   /**
    * \brief Transform joint positions before publishing.
@@ -113,7 +107,8 @@ protected:
    *
    * \return true on success, false otherwise
    */
-  virtual bool transform(const std::vector<double>& pos_in, std::vector<double>* pos_out)
+  virtual bool transform(const std::vector<double>& pos_in, 
+                         std::vector<double>* pos_out)
   {
     *pos_out = pos_in;  // by default, no transform is applied
     return true;
@@ -140,6 +135,10 @@ protected:
    * \return true on success, false otherwise
    */
   bool internalCB(JointMessage& in);
+
+  std::vector<std::string> all_joint_names_;
+  rclcpp::Publisher<control_msgs::action::FollowJointTrajectory_FeedbackMessage>::SharedPtr pub_joint_control_state_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint_sensor_state_;
 
 private:
  /**

@@ -30,17 +30,15 @@
  */
 #ifndef FLATHEADERS
 #include "simple_message/message_manager.h"
-#include "simple_message/log_wrapper.h"
 #include "simple_message/simple_message.h"
 #else
 #include "message_manager.h"
-#include "log_wrapper.h"
 #include "simple_message.h"
 #endif
+#include "rclcpp/rclcpp.hpp"
 
 // remove ROS after Melodic (bw compat for #262)
 #if defined(SIMPLE_MESSAGE_USE_ROS) || defined(ROS)
-#include "ros/ros.h"
 #else
 #include "unistd.h"
 #endif
@@ -81,7 +79,7 @@ bool MessageManager::init(SmplMsgConnection* connection)
 {
   bool rtn = false;
 
-  LOG_INFO("Initializing message manager with default comms fault handler");
+  //RCLCPP_INFO(rclcpp::get_logger("message_manager"), "Initializing message manager with default comms fault handler");
 
 
   if (NULL != connection)
@@ -92,7 +90,7 @@ bool MessageManager::init(SmplMsgConnection* connection)
   }
   else
   {
-    LOG_ERROR("NULL connection passed into manager init");
+    //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "NULL connection passed into manager init");
     rtn = false;
   }
 
@@ -103,7 +101,7 @@ bool MessageManager::init(SmplMsgConnection* connection, CommsFaultHandler* faul
 {
   bool rtn = false;
 
-    LOG_INFO("Initializing message manager");
+    //RCLCPP_INFO(rclcpp::get_logger("message_manager"), "Initializing message manager");
 
     if (NULL != connection && NULL != fault_handler)
     {
@@ -118,13 +116,13 @@ bool MessageManager::init(SmplMsgConnection* connection, CommsFaultHandler* faul
       else
       {
         rtn = false;
-        LOG_WARN("Failed to add ping handler, manager won't respond to pings");
+        //RCLCPP_WARN(rclcpp::get_logger("message_manager"), "Failed to add ping handler, manager won't respond to pings");
       }
 
     }
     else
     {
-      LOG_ERROR("NULL connection or NULL fault handler passed into manager init");
+      //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "NULL connection or NULL fault handler passed into manager init");
       rtn = false;
     }
 
@@ -145,12 +143,12 @@ void MessageManager::spinOnce()
 
   if (this->getConnection()->receiveMsg(msg))
   {
-    LOG_COMM("Message received");
+    //RCLCPP_INFO(rclcpp::get_logger("message_manager"), "Message received");
     handler = this->getHandler(msg.getMessageType());
 
     if (NULL != handler)
     {
-      LOG_DEBUG("Executing handler callback for message type: %d", handler->getMsgType());
+      //RCLCPP_DEBUG(rclcpp::get_logger("message_manager"), "Executing handler callback for message type: %d", handler->getMsgType());
       handler->callback(msg);
     }
     else
@@ -160,14 +158,14 @@ void MessageManager::spinOnce()
         simple_message::SimpleMessage fail;
         fail.init(msg.getMessageType(), CommTypes::SERVICE_REPLY, ReplyTypes::FAILURE);
         this->getConnection()->sendMsg(fail);
-        LOG_WARN("Unhandled message type encounters, sending failure reply");
+        //RCLCPP_WARN(rclcpp::get_logger("message_manager"), "Unhandled message type encounters, sending failure reply");
       }
-      LOG_ERROR("Message callback for message type: %d, not executed", msg.getMessageType());
+      //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "Message callback for message type: %d, not executed", msg.getMessageType());
     }
   }
   else
   {
-    LOG_ERROR("Failed to receive incoming message");
+    //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "Failed to receive incoming message");
     this->getCommsFaultHandler()->sendFailCB();
   }
 }
@@ -187,10 +185,10 @@ void mySleep(int sec)
 
 void MessageManager::spin()
 {
-  LOG_INFO("Entering message manager spin loop");
+  //RCLCPP_INFO(rclcpp::get_logger("message_manager"), "Entering message manager spin loop");
 // remove ROS after Melodic (bw compat for #262)
 #if defined(SIMPLE_MESSAGE_USE_ROS) || defined(ROS)
-  while (ros::ok())
+  while (rclcpp::ok())
 #else
   while (true)
 #endif
@@ -219,12 +217,12 @@ bool MessageManager::add(MessageHandler * handler, bool allow_replace)
       {
         this->handlers_[this->getNumHandlers()] = handler;
         this->setNumHandlers(this->getNumHandlers() + 1);
-        LOG_INFO("Added message handler for message type: %d", handler->getMsgType());
+        //RCLCPP_INFO(rclcpp::get_logger("message_manager"), "Added message handler for message type: %d", handler->getMsgType());
         rtn = true;
       }
       else
       {
-        LOG_ERROR("Max number of handlers exceeded");
+        //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "Max number of handlers exceeded");
         rtn = false;
       }
     }
@@ -234,13 +232,13 @@ bool MessageManager::add(MessageHandler * handler, bool allow_replace)
     }
     else
     {
-      LOG_ERROR("Failed to add handler for: %d, handler already exists", handler->getMsgType());
+      //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "Failed to add handler for: %d, handler already exists", handler->getMsgType());
       rtn = false;
     }
   }
   else
   {
-    LOG_ERROR("NULL handler not added");
+    //RCLCPP_ERROR(rclcpp::get_logger("message_manager"), "NULL handler not added");
     rtn = false;
   }
   return rtn;
