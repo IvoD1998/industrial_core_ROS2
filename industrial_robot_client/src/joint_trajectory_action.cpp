@@ -33,7 +33,7 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "control_msgs/action/follow_joint_trajectory.hpp"
-#include "industrial_msgs/msg/robot_status.h"
+#include "industrial_msgs/msg/robot_status.hpp"
 #include "industrial_robot_client/utils.h"
 #include "industrial_utils/param_utils.h"
 #include "industrial_utils/utils.h"

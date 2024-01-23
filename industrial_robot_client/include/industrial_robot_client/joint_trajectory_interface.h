@@ -207,7 +207,7 @@ protected:
    *
    * \param msg JointTrajectory message from ROS trajectory-planner
    */
-  virtual void jointTrajectoryCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr &msg);
+  virtual void jointTrajectorySubCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr msg);
 
   /**
    * \brief Callback function registered to ROS stopMotion service
@@ -217,7 +217,7 @@ protected:
    * \param res StopMotion response to service call
    * \return true always.  Look at res.code.val to see if call actually succeeded.
    */
-  virtual bool stopMotionCB(const std::shared_ptr<industrial_msgs::srv::StopMotion::Request> req,
+  virtual void stopMotionCB(const std::shared_ptr<industrial_msgs::srv::StopMotion::Request> req,
                             std::shared_ptr<industrial_msgs::srv::StopMotion::Response> res);
 
   /**
@@ -233,7 +233,7 @@ protected:
    *
    * \param msg JointState message
    */
-  virtual void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr &msg);
+  virtual void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   TcpClient default_tcp_connection_;
 
@@ -261,7 +261,7 @@ private:
    * \param res CmdJointTrajectory response to service call
    * \return true always.  Look at res.code.val to see if call actually succeeded
    */
-  bool jointTrajectoryCB(const std::shared_ptr<industrial_msgs::srv::CmdJointTrajectory::Request> req,
+  void jointTrajectoryCB(const std::shared_ptr<industrial_msgs::srv::CmdJointTrajectory::Request> req,
                          std::shared_ptr<industrial_msgs::srv::CmdJointTrajectory::Response> res);
 };
 
