@@ -46,8 +46,6 @@ Finally, activate the workspace to get access to the packages just built:
 ```bash
 $ source $HOME/colcon_ws/install/setup.bash
 ```
-### Note 
-the velocity scaling factor does not seem to work when using the MoveIt! gui in RViz; The robot moves very slowly. When using the move_group C++ interface, it works as expected
 
 
 
