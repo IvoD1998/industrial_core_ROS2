@@ -2,7 +2,7 @@
 [ROS-Industrial][] core communications packages. See the [ROS wiki][] page for more information.
 
 
-## Contents;
+## Contents
 This repository is a port for ROS2 
 
 Older releases may be found in the old ROS-Industrial [subversion repository][].
@@ -46,6 +46,8 @@ Finally, activate the workspace to get access to the packages just built:
 ```bash
 $ source $HOME/colcon_ws/install/setup.bash
 ```
+### Note 
+the velocity scaling factor does not seem to work when using the MoveIt! gui in RViz; The robot moves very slowly. When using the move_group C++ interface, it works as expected
 
 
 
